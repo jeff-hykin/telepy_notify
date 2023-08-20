@@ -19,23 +19,25 @@ Super fast (<5min setup) telegram notifications for task-completion, task progre
 from telepy_notify import Notifier
 
 # 
-# basic setup
+# setup
 # 
-# NOTE: no errors will be raised, even if someone failed to setup their bot
-#       (only warnings will be printed if a token doesnt work)
 notify = Notifier(
     # read from file
     token_path="some/file/thats/git/ignored/telegram.token",
-    # OR read from ENV var:
-    token_env_var="TELEGRAM_TOKEN",
-    # OR give the token directly
-    token="alkdsfjakjfoirj029294ijfoi24j4-2",
+    # # OR read from ENV var, ex:
+    # token_env_var="TELEGRAM_TOKEN",
+    # # OR give the token directly, ex:
+    # token="alkdsfjakjfoirj029294ijfoi24j4-2",
     
     # optional: prefix give all messages
     message_prefix="Lambda Machine: Experiment 19:",
-    # optional: use this for debugging
-    disable=True,
+    # optional: set to true when debugging
+    disable=False,
 )
+# NOTE: telepy will NEVER throw errors 
+#       if a notification fails, or if a token is bad
+#       it will intentionally only print warnings
+# (e.g. other people can run your code without setting up a bot)
 
 # 
 # Basic notification
