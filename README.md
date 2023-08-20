@@ -1,32 +1,69 @@
 # What is this?
 
-A template for python packages
-
-# How do I fill out this template?
-
-1. Change the `pyproject.toml` file (package name, version, etc)
-2. Change the `./main/your_package_name` folder
-3. Edit the `./main/your_package_name/__init__.py` file, and change the `from your_package_name.main import *`
-4. Open the `./main/setup.py` and edit the `install_requires=` part to include dependencies
-5. Edit this readme (it will be the front page of the package)
-6. Edit the `./main/your_package_name/main.py` to have your library in it
-7. Run `project local_install` to install what you just made
-8. Run `project publish` to release your package
-
-
-## (Readme template below)
-
-# What is this?
-
-(Your answer here)
+<5min setup for telegram notifications about errors, progress, and task-completion.
 
 # How do I use this?
 
-`pip install your_package_name`
+1. `pip install telepy_notify`
 
+2. 30 sec:
+  - DM https://t.me/botfather
+  - send `/newbot` to ^
+  - copy the token out of the response message
+
+3. DM your bot to initialize it (important!)
+
+4. profit
 
 ```python
-from your_package_name import something
+from telepy_notify import Notifier
 
-# example of how to use your package here
+# 
+# basic setup
+# 
+# NOTE: no errors will be raised, even if someone failed to setup their bot
+#       (only warnings will be printed if a token doesnt work)
+notify = Notifier(
+    # read from file
+    token_path="some/file/thats/git/ignored/telegram.token",
+    # OR read from ENV var:
+    token_env_var="TELEGRAM_TOKEN",
+    # OR give the token directly
+    token="alkdsfjakjfoirj029294ijfoi24j4-2",
+)
+
+# 
+# Basic notification
+# 
+notify.send("Howdy!")
+notify.send("Howdy! <b>I'm bold</b>")
+notify.send("Howdy! <b>I'm bold</b>\n<code>thing = [1,3,4]</code>")
+
+# 
+# get duration and/or error information
+# 
+with notify.when_done:
+    blah_blah_blah = 10
+    for blah in range(blah_blah_blah):
+        sleep(100)
+    raise Exception(f'''Hello Telegram :)''')
+
+# 
+# Progress notifications
+# 
+#    - gives ETA and other time-info
+#    - can limit print-rate (by time passed or percent-progress)
+#    - will only notify on-print
+for progress, epoch in notify.progress([5,6,7], seconds_per_print=100):
+    index = progress.index
+    
+    # do stuff
+    import random
+    accuracy = random.random()
+    if accuracy > 0.99:
+        notify.send("Gottem 🎉🎉🎉")
+    # end do stuff
+    
+    progress.message = f"recent accuracy: <code>{accuracy}</code>"
+
 ```
