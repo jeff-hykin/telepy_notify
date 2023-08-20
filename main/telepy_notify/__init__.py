@@ -7,7 +7,7 @@ import os
 from os.path import expanduser
 home = expanduser('~')
 
-def to_human_time_string((secs):)
+def to_human_time_string(secs):
     secs  = int(round(secs))
     mins  = secs  // 60; secs  = secs  % 60
     hours = mins  // 60; mins  = mins  % 60
