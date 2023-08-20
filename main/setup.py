@@ -1,6 +1,6 @@
 import setuptools
 import toml
-from file_system_py import iterate_paths_in
+from file_system_py import iterate_paths_in, basename
 
 # 
 # get the data out of the toml file
@@ -31,6 +31,7 @@ setuptools.setup(
         package_info["name"]: [
             each[len(package_info["name"])+1:]
                 for each in iterate_paths_in(package_info["name"], recursively=True)
+                    if '/settings/' not in each
         ],
     },
     install_requires=[
