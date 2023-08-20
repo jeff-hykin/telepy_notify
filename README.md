@@ -13,7 +13,7 @@
 
 3. DM your bot to initialize it (important!)
 
-4. profit
+4. Use it
 
 ```python
 from telepy_notify import Notifier
@@ -30,6 +30,11 @@ notify = Notifier(
     token_env_var="TELEGRAM_TOKEN",
     # OR give the token directly
     token="alkdsfjakjfoirj029294ijfoi24j4-2",
+    
+    # optional: prefix give all messages
+    message_prefix="Lambda Machine: Experiment 19:",
+    # optional: use this for debugging
+    disable=True,
 )
 
 # 
