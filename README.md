@@ -6,8 +6,8 @@
 
 1. `pip install telepy_notify`
 
-2. 30 sec:
-  - DM https://t.me/botfather
+2. Take 30sec to get a token:
+  - open up a chat with https://t.me/botfather
   - send `/newbot` to ^
   - copy the token out of the response message
 

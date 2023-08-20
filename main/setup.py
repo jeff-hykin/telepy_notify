@@ -17,6 +17,7 @@ with open("../README.md", "r") as file_handle:
 # 
 # generate the project
 #  
+print("might take a second to list all the files")
 setuptools.setup(
     name=package_info["name"],
     version=package_info["version"],
@@ -31,7 +32,7 @@ setuptools.setup(
         package_info["name"]: [
             each[len(package_info["name"])+1:]
                 for each in iterate_paths_in(package_info["name"], recursively=True)
-                    if '/settings/' not in each
+                    if not each.endswith(".pyc") and not each.endswith("/.keep") and ('/settings/' not in each) and ('/commands/' not in each) and ('/documentation/' not in each)
         ],
     },
     install_requires=[
