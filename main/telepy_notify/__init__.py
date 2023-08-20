@@ -80,7 +80,7 @@ class Notifier:
             self.chat_id = FS.read(self.chat_id_cache_file)
             
             # only read from server if not disabled
-            if not self.disable:
+            if not self.chat_id and not self.disable:
                 self.chat_id = self.get_chat_id()
                 # if it worked
                 if self.chat_id != None and not bust_cache and not os.path.exists(self.chat_id_cache_file):
@@ -90,6 +90,11 @@ class Notifier:
                         FS.write(data=str(self.chat_id), to=self.chat_id_cache_file, force=False)
                     except Exception as error:
                         pass
+        
+        if type(self.chat_id) == str:
+            self.chat_id = self.chat_id.strip()
+        if type(self.token) == str:
+            self.token = self.token.strip()
         
         class WhenDone:
             def __init__(this, prefix=None):
