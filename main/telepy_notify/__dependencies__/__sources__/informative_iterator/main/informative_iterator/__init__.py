@@ -81,9 +81,10 @@ def to_time_string(secs):
 nested_progress_bars = []
 class ProgressBar:
     """
-    from informative_iterator import ProgressBar, time
-    for progress, each in ProgressBar(10000):
-        time.sleep(0.01)
+    Example:
+        from informative_iterator import ProgressBar, time
+        for progress, each in ProgressBar(10000):
+            time.sleep(0.01)
     """
     
     layout = [ 'title', 'bar', 'percent', 'spacer', 'fraction', 'spacer', 'remaining_time', 'spacer', 'end_time', 'spacer', 'duration', 'spacer', ]
@@ -119,6 +120,13 @@ class ProgressBar:
                 actual_value = arg_value
             # set the object's value
             setattr(self, each_option, actual_value)
+        
+        # if only given seconds_per_print, then clear the default percent_per_print
+        if (seconds_per_print != NotGiven and seconds_per_print != None) and percent_per_print == NotGiven:
+            self.percent_per_print = 100
+        # if only given percent_per_print, then clear the default seconds_per_print
+        if (percent_per_print != NotGiven and percent_per_print != None) and seconds_per_print == NotGiven:
+            self.seconds_per_print = math.inf
         
         # initilize misc values
         self.past_indicies     = []
@@ -297,13 +305,14 @@ class ProgressBar:
                 
                 if self.progress_data.updated:
                     self.prev_time = self.progress_data.time
-                    self.times.append(self.progress_data.time)
-                    self.past_indicies.append(self.progress_data.index)
                     
                 # also printout at each percent marker
                 if self.progress_data.percent >= self.next_percent_mark:
                     self.next_percent_mark += self.percent_per_print
                     self.progress_data.updated = True
+                
+                self.times.append(self.progress_data.time)
+                self.past_indicies.append(self.progress_data.index)
                 
                 if self.progress_data.updated:
                     self.total_eslaped_time = 0

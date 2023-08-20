@@ -62,7 +62,7 @@ class Notifier:
         token_env_var=None,
         token=None,
         chat_id=None,
-        parse_mode=None,
+        parse_mode="HTML",
         bust_cache=False,
     ):
         self.disable = disable
@@ -143,7 +143,7 @@ class Notifier:
                 data["parse_mode"] = self.parse_mode
             response = requests.get(f"https://api.telegram.org/bot{self.token}/sendMessage", data=data, timeout=10)
             if response.status_code != 200 or response.json()["ok"] is not True:
-                print(f"Failed to send notification:\n\tstatus_code={response.status_code}\n\tjson:\n\t{response.json()}")
+                print(f"Warning: telepy failed to send notification:\n\tstatus_code={response.status_code}\n\tjson:\n\t{response.json()}")
                 self.bust_cache() # just to be safe, encase the chat_id from here got corrupted
         except Exception as e:
             print(f"Failed to send notification:\n\texception:\n\t{e}")
@@ -240,6 +240,7 @@ class Notifier:
             real_title = kwargs.get("title", "")
             title = f"<b>{real_title}</b>\n" if len(real_title) else ""
             for progress, item in ProgressBar(*args,**kwargs):
+                print(f'''\nprogress = {progress}\n''')
                 if progress.updated: # e.g. update rate can be slower than iteration rate
                     self.send(title+progress.previous_output[len(real_title)+1:].replace("|", "\n|")+progress.get("message", ""))
                 yield (progress, item)

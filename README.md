@@ -1,6 +1,6 @@
 # What is this?
 
-<5min setup for telegram notifications about errors, progress, and task-completion.
+<5min setup for telegram notifications about errors, progress, and task-completion. This is an extremely minimal module, with no pip dependencies.
 
 # How do I use this?
 
@@ -45,16 +45,21 @@ notify.send("Howdy! <b>I'm bold</b>\n<code>thing = [1,3,4]</code>")
 with notify.when_done:
     blah_blah_blah = 10
     for blah in range(blah_blah_blah):
-        sleep(100)
+        from time import sleep
+        sleep(0.1)
     raise Exception(f'''Hello Telegram :)''')
+# """
+# process took: 1sec, ended at: Sun Aug 20 11:23:38 2023 however it ended with an error: Exception('Hello Telegram :)')
+# """
 
 # 
 # Progress notifications
 # 
 #    - gives ETA and other time-info
 #    - can limit print-rate (by time passed or percent-progress)
-#    - will only notify on-print
-for progress, epoch in notify.progress([5,6,7], seconds_per_print=100):
+#        e.g. percent_per_print=50 => message me after 50% progress
+#        e.g. seconds_per_print=60*30 => message once every 30min
+for progress, epoch in notify.progress(range(100), percent_per_print=50, seconds_per_print=60*30):
     index = progress.index
     
     # do stuff
@@ -65,5 +70,17 @@ for progress, epoch in notify.progress([5,6,7], seconds_per_print=100):
     # end do stuff
     
     progress.message = f"recent accuracy: <code>{accuracy}</code>"
+
+# that^ outputs:
+# message1:
+#     [=================>.................] 50.00% 
+#     |  50/100 
+#     | remaining: 0sec 
+#     | eta: 11:52:48 
+#     | elapsed: 0sec 
+#     | recent accuracy: 0.5086382690344122
+# message2:
+#     Done in 1sec at 11:52:49
+
 
 ```
