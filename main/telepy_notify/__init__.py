@@ -37,7 +37,7 @@ class Notifier:
         notifier.send("Howdy")
         
         # Error handle
-        with notifier.on_error():
+        with notifier.when_done:
             raise Exception(f'''Hello Telegram :)''')
         
         # Progress notifications
@@ -65,60 +65,67 @@ class Notifier:
         parse_mode="HTML",
         bust_cache=False,
     ):
-        self.disable = disable
-        self.prefix = f"<b>{message_prefix}</b>: " if message_prefix != None else ""
-        self.parse_mode = parse_mode
-        self.chat_id = chat_id
-        bust_cache and self.bust_cache()
-        self.token = token or (token_path and FS.read(token_path)) or (token_env_var and os.environ.get(token_env_var))
-        self.token_hash = super_hash(self.token)
-        self.chat_id_cache_file = f"{Notifier.cache_folder}/chat_id_{self.token_hash}.txt"
-        
-        # get chat_id from cache, or from server
-        if self.chat_id == None:
-            # try to read from cache
-            self.chat_id = FS.read(self.chat_id_cache_file)
+        try:
+            self.disable = disable
+            self.prefix = f"<b>{message_prefix}</b>: " if message_prefix != None else ""
+            self.parse_mode = parse_mode
+            self.chat_id = chat_id
+            bust_cache and self.bust_cache()
+            self.token = token or (token_path and FS.read(token_path)) or (token_env_var and os.environ.get(token_env_var))
+            self.token_hash = super_hash(self.token)
+            self.chat_id_cache_file = f"{Notifier.cache_folder}/chat_id_{self.token_hash}.txt"
             
-            # only read from server if not disabled
-            if not self.chat_id and not self.disable:
-                self.chat_id = self.get_chat_id()
-                # if it worked
-                if self.chat_id != None and not bust_cache and not os.path.exists(self.chat_id_cache_file):
-                    # make sure the parent folder exists
-                    FS.ensure_is_folder(FS.parent_path(self.chat_id_cache_file), force=False)
-                    try:
-                        FS.write(data=str(self.chat_id), to=self.chat_id_cache_file, force=False)
-                    except Exception as error:
-                        pass
-        
-        if type(self.chat_id) == str:
-            self.chat_id = self.chat_id.strip()
-        if type(self.token) == str:
-            self.token = self.token.strip()
-        
-        class WhenDone:
-            def __init__(this, prefix=None):
-                this.old_prefix = self.prefix
-                this.prefix = str(prefix) if prefix != None else self.prefix
-                self.prefix = this.prefix
-            
-            def __enter__(this):
-                this.start_time = time.time() 
-                return this
-            
-            def __exit__(this, _, error, traceback):
-                this.end_time = time.time() 
-                duration = to_human_time_string(this.end_time - this.start_time)
-                message = f"process took: {duration}, ended at: {time.ctime()}"
-                if error is not None:
-                    message += f" however it ended with an error: {repr(error)}"
+            # get chat_id from cache, or from server
+            if self.chat_id == None:
+                # try to read from cache
+                self.chat_id = FS.read(self.chat_id_cache_file)
                 
-                self.send(message)
-                self.prefix = this.old_prefix
+                # only read from server if not disabled
+                if not self.chat_id and not self.disable:
+                    self.chat_id = self.get_chat_id()
+                    # if it worked
+                    if self.chat_id != None and not bust_cache and not os.path.exists(self.chat_id_cache_file):
+                        # make sure the parent folder exists
+                        FS.ensure_is_folder(FS.parent_path(self.chat_id_cache_file), force=False)
+                        try:
+                            FS.write(data=str(self.chat_id), to=self.chat_id_cache_file, force=False)
+                        except Exception as error:
+                            pass
             
+            if type(self.chat_id) == str:
+                self.chat_id = self.chat_id.strip()
+            if type(self.token) == str:
+                self.token = self.token.strip()
         
-        self.WhenDone = WhenDone
-        self.when_done = WhenDone()
+            class WhenDone:
+                def __init__(this, prefix=None):
+                    this.old_prefix = self.prefix
+                    this.prefix = str(prefix) if prefix != None else self.prefix
+                    self.prefix = this.prefix
+                
+                def __enter__(this):
+                    this.start_time = time.time() 
+                    return this
+                
+                def __exit__(this, _, error, traceback):
+                    try:
+                        this.end_time = time.time() 
+                        duration = to_human_time_string(this.end_time - this.start_time)
+                        message = f"process took: {duration}, ended at: {time.ctime()}"
+                        if error is not None:
+                            message += f" however it ended with an error: {repr(error)}"
+                        
+                        self.send(message)
+                        self.prefix = this.old_prefix
+                    except Exception as error:
+                        print(f'''Warning: telepy hit an unexpected error in its __exit__ function: ''', error)
+                
+            
+            self.WhenDone = WhenDone
+            self.when_done = WhenDone()
+        
+        except Exception as error:
+            print(f'''Warning: telepy hit an unexpected error in its initializer: ''', error)
     
     def bust_cache(self):
         try:
@@ -152,20 +159,6 @@ class Notifier:
                 self.bust_cache() # just to be safe, encase the chat_id from here got corrupted
         except Exception as e:
             print(f"Failed to send notification:\n\texception:\n\t{e}")
-    
-    def on_error(self, *, prefix=None):
-        """
-        Example:
-            with notifier.on_error(prefix="Problem with XYZ operation:"):
-                import random
-                for blah_blah_blah in range(1000):
-                    if random.random() > 0.5:
-                        raise Exception(f'''Errorrrr''')
-            
-            # you'll get a notification:
-                # "Problem with XYZ operation: Exception('Errorrrr')"
-        """
-        return self.HandleError(prefix)
     
     def progress(self, *args, **kwargs):
         """
@@ -245,7 +238,6 @@ class Notifier:
             real_title = kwargs.get("title", "")
             title = f"<b>{real_title}</b>\n" if len(real_title) else ""
             for progress, item in ProgressBar(*args,**kwargs):
-                print(f'''\nprogress = {progress}\n''')
                 if progress.updated: # e.g. update rate can be slower than iteration rate
                     self.send(title+progress.previous_output[len(real_title)+1:].replace("|", "\n|")+progress.get("message", ""))
                 yield (progress, item)

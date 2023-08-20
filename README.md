@@ -34,10 +34,12 @@ notify = Notifier(
     # optional: set to true when debugging
     disable=False,
 )
-# NOTE: telepy will NEVER throw errors 
-#       if a notification fails, or if a token is bad
-#       it will intentionally only print warnings
-# (e.g. other people can run your code without setting up a bot)
+# NOTE:
+#    other people can run your code without setting up a bot
+#    because telepy will NEVER throw errors 
+#    if a notification fails, or if a token is bad
+#    it will intentionally only print warnings instead of
+#    crashing whatever long-running process you have
 
 # 
 # Basic notification
