@@ -1,4 +1,8 @@
-import requests
+try:
+    import requests
+except Exception as error:
+    requests = None
+
 from .__dependencies__.informative_iterator import ProgressBar
 from .__dependencies__.blissful_basics import FS, super_hash
 import time 
