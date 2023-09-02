@@ -542,9 +542,11 @@ def create_time_estimator(smoothing_buffer_size=5, smoothing_threshold_in_second
         if secs_remaining != math.inf:
             end_time = (start_time + timedelta(seconds=total_eslaped_time + secs_remaining)).timestamp()
             list_of_end_times.append(end_time)
-            list_of_end_times = list_of_end_times[-smoothing_buffer_size:]
+            # buffer slowly gets bigger over time
+            cutoff = int(math.log(index+2) * smoothing_buffer_size)
+            list_of_end_times = list_of_end_times[-cutoff:]
         
-        if seconds_since_prev_update <= smoothing_threshold_in_seconds:
+        if seconds_since_prev_update <= smoothing_threshold_in_seconds and len(list_of_end_times) > 0:
             end_time = average(list_of_end_times)
             secs_remaining = end_time - time.time()
         
