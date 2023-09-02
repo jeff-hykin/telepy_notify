@@ -44,8 +44,6 @@ except ImportError:
 except AttributeError:
     ipython_exists = False
     
-class NotGiven: pass
-
 def subsequence_replace(a_list, sequence, replacement):
     que = []
     new_list = []
@@ -105,7 +103,7 @@ class ProgressBar:
         for each_key, each_value in config.items():
             setattr(this_class, each_key, each_value)
     
-    def __init__(self, iterator, *, title=None, iterations=None, layout=None, disable_logging=NotGiven, minimal=NotGiven, inline=NotGiven, progress_bar_size=NotGiven, seconds_per_print=NotGiven, percent_per_print=NotGiven, lookback_size=NotGiven):
+    def __init__(self, iterator, *, title=None, iterations=None, layout=None, disable_logging=None, minimal=None, inline=None, progress_bar_size=None, seconds_per_print=None, percent_per_print=None, lookback_size=None):
         original_generator = range(int(iterator)) if isinstance(iterator, (int, float)) else iterator
         self.title = title or ""
         
@@ -113,7 +111,7 @@ class ProgressBar:
         for each_option in [ "disable_logging", "minimal", "inline", "progress_bar_size", "seconds_per_print", "percent_per_print", "lookback_size" ]:
             arg_value = eval(each_option, locals())
             # default to the class value if not given
-            if arg_value == NotGiven:
+            if arg_value == None:
                 actual_value = getattr(ProgressBar, each_option, None)
             # otherwise use the given value
             else:
@@ -122,10 +120,10 @@ class ProgressBar:
             setattr(self, each_option, actual_value)
         
         # if only given seconds_per_print, then clear the default percent_per_print
-        if (seconds_per_print != NotGiven and seconds_per_print != None) and percent_per_print == NotGiven:
+        if (seconds_per_print != None) and percent_per_print == None:
             self.percent_per_print = 100
         # if only given percent_per_print, then clear the default seconds_per_print
-        if (percent_per_print != NotGiven and percent_per_print != None) and seconds_per_print == NotGiven:
+        if (percent_per_print != None) and seconds_per_print == None:
             self.seconds_per_print = math.inf
         
         # initilize misc values
